@@ -131,7 +131,7 @@ steps.addEventListener("change", update_state);
 stepsize.addEventListener("change", update_state);
 
 function setup(){
-	createCanvas(800, 600);
+	createCanvas(800, 500);
 	update_state();
 }
 
