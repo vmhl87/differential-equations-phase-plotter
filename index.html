@@ -8,20 +8,30 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     </head>
     <body>
-        <p>
-            Variable 1: <input id="var1" style="width: 10px;" value="R"></input>, 
-            Expression: <input id="exp1" value="3*R - 1.4*R*F"></input>
-            <br>
-            Variable 2: <input id="var2" style="width: 10px;" value="F"></input>,
-            Expression: <input id="exp2" value="-F + 0.8*R*F"></input>
-            <br><br>
-            Initial condition:
-            <input id="startx" style="width: 40px" value="1"></input>,
-            <input id="starty" style="width: 40px" value="1"></input>
-            <br>
-            Steps: <input id="steps" style="width: 40px" value="1000">,
-            Step size: <input id="stepsize" style="width: 42px" value="0.01">
-        </p>
+        <div style="width: 800px">
+            <div style="float: right; width: 30%; text-align: right;">
+                Initial condition:
+                <input id="startx" style="width: 40px" value="1"></input>,
+                <input id="starty" style="width: 40px" value="1"></input>
+                <br>
+                Steps: <input id="steps" style="width: 40px" value="1000">,
+                Step size: <input id="stepsize" style="width: 42px" value="0.01">
+                <br><br>
+                View:
+                <button id="xy">X vs Y</button>
+                <button id="zx">T vs X</button>
+                <button id="zy">T vs Y</button>
+                <p></p>
+            </div>
+            <div style="float: left; width: 70%;">
+                Variable 1: <input id="var1" style="width: 10px;" value="R"></input>, 
+                Expression: <input id="exp1" value="3*R - 1.4*R*F"></input>
+                <br>
+                Variable 2: <input id="var2" style="width: 10px;" value="F"></input>,
+                Expression: <input id="exp2" value="-F + 0.8*R*F"></input>
+                <p></p>
+            </div>
+        </div>
         <p id="error" style="color: red;"></p>
         <script src="app.js"></script>
     </body>

@@ -5,16 +5,6 @@ body {
 }
 
 canvas {
-	/*
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: auto;
-	margin-bottom: auto;
-	*/
-}
-
-canvas {
 	-webkit-tap-highlight-color: transparent;
 	-webkit-touch-callout: none;
 	touch-action: manipulation;
