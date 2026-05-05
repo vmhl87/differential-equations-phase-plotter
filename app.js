@@ -452,7 +452,7 @@ function draw(){
 			noStroke();
 			if(camera[2][2] < 0) textAlign(LEFT, CENTER);
 			else textAlign(RIGHT, CENTER);
-			text(z.toPrecision(3), ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
+			text(z, ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
 			pop();
 			push();
 			fill(100, Math.max(0, Math.min(255, Math.min(
@@ -462,9 +462,9 @@ function draw(){
 				),
 				5000 * (1-Math.abs(camera[2][2]))))));
 			noStroke();
-			if(camera[2][0] < 0) textAlign(CENTER, BOTTOM);
-			else textAlign(CENTER, TOP);
-			text(z.toPrecision(3), ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
+			if((camera[2][0] < 0) ^ (camera[2][1] < 0)) textAlign(CENTER, TOP);
+			else textAlign(CENTER, BOTTOM);
+			text(z, ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
 			pop();
 			line(..._map(origin[0] + 12/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps),
 				..._map(origin[0] - 12/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
