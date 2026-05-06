@@ -26,17 +26,19 @@ let state = {
 	exp2: null,
 };
 
-function dx(X, Y){
-	let ctx = {};
-	ctx[state.var1] = X;
-	ctx[state.var2] = Y;
+function dx(X, Y, T){
+	let ctx = new Map();
+	ctx.set(state.var1, X);
+	ctx.set(state.var2, Y);
+	ctx.set("T", T);
 	return state.exp1.evaluate(ctx);
 }
 
-function dy(X, Y){
-	let ctx = {};
-	ctx[state.var1] = X;
-	ctx[state.var2] = Y;
+function dy(X, Y, T){
+	let ctx = new Map();
+	ctx.set(state.var1, X);
+	ctx.set(state.var2, Y);
+	ctx.set("T", T);
 	return state.exp2.evaluate(ctx);
 }
 
@@ -93,9 +95,10 @@ function update_state(){
 		error_text += "Error: Expression 2: " + e.message + '\n';
 	}
 
-	const ctx = {};
-	ctx[_state.var1] = _state.initial[0];
-	ctx[_state.var2] = _state.initial[1];
+	const ctx = new Map();
+	ctx.set(_state.var1, _state.initial[0]);
+	ctx.set(_state.var2, _state.initial[1]);
+	ctx.set("T", 0);
 
 	try{
 		_state.exp1.evaluate(ctx);
@@ -515,24 +518,24 @@ function recalc(){
 	bounds = [[x[0], x[0]], [y[0], y[0]]];
 
 	for(let i=1; i<state.steps; ++i){
-		const x0 = x[i-1], y0 = y[i-1];
+		const x0 = x[i-1], y0 = y[i-1], t0 = (i-1)*state.dt;
 
 		if(!isFinite(x0) || !isFinite(y0)){
 			x[i] = x0, y[i] = y0;
 			continue;
 		}
 
-		const x1 = dx(x0, y0);
-		const y1 = dy(x0, y0);
+		const x1 = dx(x0, y0, t0);
+		const y1 = dy(x0, y0, t0);
 
-		const x2 = dx(x0 + x1*state.dt/2, y0 + y1*state.dt/2);
-		const y2 = dy(x0 + x1*state.dt/2, y0 + y1*state.dt/2);
+		const x2 = dx(x0 + x1*state.dt/2, y0 + y1*state.dt/2, t0 + state.dt/2);
+		const y2 = dy(x0 + x1*state.dt/2, y0 + y1*state.dt/2, t0 + state.dt/2);
 
-		const x3 = dx(x0 + x2*state.dt/2, y0 + y2*state.dt/2);
-		const y3 = dy(x0 + x2*state.dt/2, y0 + y2*state.dt/2);
+		const x3 = dx(x0 + x2*state.dt/2, y0 + y2*state.dt/2, t0 + state.dt/2);
+		const y3 = dy(x0 + x2*state.dt/2, y0 + y2*state.dt/2, t0 + state.dt/2);
 
-		const x4 = dx(x0 + x3*state.dt, y0 + y3*state.dt);
-		const y4 = dy(x0 + x3*state.dt, y0 + y3*state.dt);
+		const x4 = dx(x0 + x3*state.dt, y0 + y3*state.dt, t0 + state.dt);
+		const y4 = dy(x0 + x3*state.dt, y0 + y3*state.dt, t0 + state.dt);
 
 		x[i] = x0 + (x1 + 2*x2 + 2*x3 + x4) * state.dt/6;
 		y[i] = y0 + (y1 + 2*y2 + 2*y3 + y4) * state.dt/6;
