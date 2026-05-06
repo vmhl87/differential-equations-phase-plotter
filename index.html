@@ -10,13 +10,16 @@
     <body>
         <div style="width: 800px">
             <div style="float: right; width: 30%; text-align: right;">
-                Initial condition:
-                <input id="startx" style="width: 40px" value="1"></input>,
-                <input id="starty" style="width: 40px" value="1"></input>
+                <div id="condition-container">
+                    <div>
+                        Initial condition:
+                        <input id="startx-0" style="width: 40px;" value="1"></input>,
+                        <input id="starty-0" style="width: 40px;" value="1"></input>
+                    </div>
+                    <button id="new-condition" style="margin-top: 5px;">Add initial condition</button>
+                    <button id="remove-condition" style="margin-top: 5px;">Remove</button>
+                </div>
                 <br>
-                Steps: <input id="steps" style="width: 40px" value="1000">,
-                Step size: <input id="stepsize" style="width: 42px" value="0.01">
-                <br><br>
                 View:
                 <button id="xy">X vs Y</button>
                 <button id="zx">T vs X</button>
@@ -29,6 +32,9 @@
                 <br>
                 Variable 2: <input id="var2" style="width: 10px;" value="F"></input>,
                 Expression: <input id="exp2" value="-F + 0.8*R*F"></input>
+                <br><br>
+                Steps: <input id="steps" style="width: 40px" value="1000">,
+                Step size: <input id="stepsize" style="width: 42px" value="0.01">
                 <p></p>
             </div>
         </div>

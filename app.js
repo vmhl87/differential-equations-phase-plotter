@@ -4,8 +4,12 @@ const var2 = document.getElementById("var2");
 const exp1 = document.getElementById("exp1");
 const exp2 = document.getElementById("exp2");
 
-const startx = document.getElementById("startx");
-const starty = document.getElementById("starty");
+const new_condition = document.getElementById("new-condition");
+const remove_condition = document.getElementById("remove-condition");
+let condition_count = 1;
+
+const startx = [document.getElementById("startx-0")];
+const starty = [document.getElementById("starty-0")];
 
 const steps = document.getElementById("steps");
 const stepsize = document.getElementById("stepsize");
@@ -17,7 +21,7 @@ const v_zy = document.getElementById("zy");
 const error_box = document.getElementById("error");
 
 let state = {
-	initial: [0, 0],
+	initial: [],
 	steps: 0,
 	dt: 0,
 	var1: "X",
@@ -46,7 +50,7 @@ let x = [], y = [], bounds = [[0, 0], [0, 0]];
 
 function update_state(){
 	const _state = {
-		initial: [0, 0],
+		initial: [],
 		steps: 0,
 		dt: 0,
 		var1: "X",
@@ -55,8 +59,11 @@ function update_state(){
 		exp2: null,
 	};
 
-	_state.initial[0] = Number(startx.value);
-	_state.initial[1] = Number(starty.value);
+	const container = document.getElementById("condition-container");
+	condition_count = Array.from(container.children).filter(x => x.tagName == "DIV").length;
+
+	for(let i=0; i<condition_count; ++i)
+		_state.initial.push([Number(startx[i].value), Number(starty[i].value)]);
 
 	_state.steps = Number(steps.value);
 	_state.dt = Number(stepsize.value);
@@ -66,8 +73,10 @@ function update_state(){
 
 	let error_text = "";
 
-	if(isNaN(_state.initial[0]) || isNaN(_state.initial[1]))
-		error_text += "Error: Invalid initial condition\n";
+	for(let i=0; i<condition_count; ++i){
+		if(isNaN(_state.initial[0][0]) || isNaN(_state.initial[0][1]))
+			error_text += "Error: Invalid initial condition\n";
+	}
 
 	if(isNaN(_state.steps))
 		error_text += "Error: Invalid step count\n";
@@ -95,23 +104,25 @@ function update_state(){
 		error_text += "Error: Expression 2: " + e.message + '\n';
 	}
 
-	const ctx = new Map();
-	ctx.set(_state.var1, _state.initial[0]);
-	ctx.set(_state.var2, _state.initial[1]);
-	ctx.set("T", 0);
+	for(let i=0; i<condition_count; ++i){
+		const ctx = new Map();
+		ctx.set(_state.var1, _state.initial[i][0]);
+		ctx.set(_state.var2, _state.initial[i][1]);
+		ctx.set("T", 0);
 
-	try{
-		_state.exp1.evaluate(ctx);
+		try{
+			_state.exp1.evaluate(ctx);
 
-	}catch(e){
-		error_text += "Error: Expression 1: " + e.message + '\n';
-	}
+		}catch(e){
+			error_text += "Error: Expression 1: " + e.message + '\n';
+		}
 
-	try{
-		_state.exp2.evaluate(ctx);
+		try{
+			_state.exp2.evaluate(ctx);
 
-	}catch(e){
-		error_text += "Error: Expression 2: " + e.message + '\n';
+		}catch(e){
+			error_text += "Error: Expression 2: " + e.message + '\n';
+		}
 	}
 
 	error_text = error_text.trim().replaceAll("\n", "<br>");
@@ -134,8 +145,47 @@ var2.addEventListener("change", update_state);
 exp1.addEventListener("change", update_state);
 exp2.addEventListener("change", update_state);
 
-startx.addEventListener("change", update_state);
-starty.addEventListener("change", update_state);
+new_condition.addEventListener("click", _ => {
+	const container = document.getElementById("condition-container");
+
+	const next = document.createElement("div");
+	next.id = "condition-container-" + condition_count;
+	next.textContent = "Initial condition: ";
+	const _startx = document.createElement("input");
+	_startx.id = "startx-" + condition_count;
+	_startx.style.width = "40px";
+	next.appendChild(_startx);
+	const _com = document.createElement("text");
+	_com.textContent = ", ";
+	next.appendChild(_com);
+	const _starty = document.createElement("input");
+	_starty.id = "starty-" + condition_count;
+	_starty.style.width = "40px";
+	next.appendChild(_starty);
+
+	startx.push(_startx);
+	starty.push(_starty);
+	_startx.addEventListener("change", update_state);
+	_starty.addEventListener("change", update_state);
+
+	container.insertBefore(next, container.children[condition_count]);
+	++condition_count;
+
+	update_state();
+});
+
+remove_condition.addEventListener("click", _ => {
+	if(condition_count == 1) return;
+
+	--condition_count;
+	const el = document.getElementById("condition-container-" + condition_count);
+	if(el) el.parentElement.removeChild(el);
+
+	update_state();
+});
+
+startx[0].addEventListener("change", update_state);
+starty[0].addEventListener("change", update_state);
 
 steps.addEventListener("change", update_state);
 stepsize.addEventListener("change", update_state);
@@ -305,7 +355,7 @@ function draw(){
 	const xscale = Math.pow(2, Math.ceil(Math.log2(bounds[0][1] - bounds[0][0]))) / 4;
 	const yscale = Math.pow(2, Math.ceil(Math.log2(bounds[1][1] - bounds[1][0]))) / 4;
 	const zscale = Math.pow(2, Math.ceil(Math.log2(state.steps*state.dt))) / 4 / state.dt;
-	for(let x=xscale*(Math.floor(state.initial[0]/xscale)-5), i=0; i<60; ++i, x+=xscale/4){
+	for(let x=xscale*(Math.floor(bounds[0][0]/xscale)-5), i=0; i<60; ++i, x+=xscale/4){
 		if(x == 0) continue;
 		if(x > (bounds[0][0]-(bounds[0][0]+bounds[0][1])/2) * (height/2 - 50) / (height/2 - 100)  + (bounds[0][0]+bounds[0][1])/2
 			&& x < (bounds[0][1]-(bounds[0][0]+bounds[0][1])/2) * (height/2 - 50) / (height/2 - 100)  + (bounds[0][0]+bounds[0][1])/2){
@@ -366,7 +416,7 @@ function draw(){
 			}
 		}
 	}
-	for(let y=yscale*(Math.floor(state.initial[1]/yscale)-5), i=0; i<60; ++i, y+=yscale/4){
+	for(let y=yscale*(Math.floor(bounds[1][0]/yscale)-5), i=0; i<60; ++i, y+=yscale/4){
 		if(y == 0) continue;
 		if(y > (bounds[1][0]-(bounds[1][0]+bounds[1][1])/2) * (height/2 - 50) / (height/2 - 100)  + (bounds[1][0]+bounds[1][1])/2
 			&& y < (bounds[1][1]-(bounds[1][0]+bounds[1][1])/2) * (height/2 - 50) / (height/2 - 100)  + (bounds[1][0]+bounds[1][1])/2){
@@ -477,74 +527,99 @@ function draw(){
 		}
 	}
 
-	fill(255, 25, 100, 100);
-	noStroke();
-	circle(..._map(...state.initial, 0), 10);
+	const pal1 = [
+		[255, 25, 100],
+		[100, 200, 25],
+		[50, 50, 150],
+	];
 
-	stroke(25, 100, 255, 100);
+	noStroke();
+	for(let i=0; i<condition_count; ++i){
+		fill(...pal1[i%pal1.length], 100);
+		circle(..._map(...state.initial[i], 0), 10);
+	}
+
 	strokeWeight(2);
 	noFill();
 
-	beginShape();
+	const pal2 = [
+		[25, 100, 255],
+		[255, 50, 25],
+		[100, 100, 100],
+	];
 
-	for(let i=0; i<state.steps; ++i) vertex(..._map(x[i], y[i], i/state.steps));
-
-	endShape();
+	for(let j=0; j<condition_count; ++j){
+		stroke(...pal2[j%pal2.length], 100);
+		beginShape();
+		for(let i=0; i<state.steps; ++i) vertex(..._map(x[j][i], y[j][i], i/state.steps));
+		endShape();
+	}
 
 	fill(100, Math.min(255, Math.max(0, 5000 * (1-Math.abs(Math.sqrt(camera[2][0]*camera[2][0] + camera[2][1]*camera[2][1])))))); noStroke();
-	let init = _map(...state.initial, 0);
-	const S = "(" + state.initial[0].toPrecision(2) + ", " + state.initial[1].toPrecision(2) + ")";
-	textSize(11);
-	if(origin[1] < (bounds[1][0]+bounds[1][1])/2){
-		push();
-		textAlign(CENTER, BOTTOM);
-		text(S, init[0], init[1]-12);
-		pop();
-	}else{
-		push();
-		textAlign(CENTER, TOP);
-		text(S, init[0], init[1]+12);
-		pop();
+	for(let i=0; i<condition_count; ++i){
+		let init = _map(...state.initial[i], 0);
+		const S = "(" + state.initial[i][0].toPrecision(2) + ", " + state.initial[i][1].toPrecision(2) + ")";
+		textSize(11);
+		if(origin[1] < (bounds[1][0]+bounds[1][1])/2){
+			push();
+			textAlign(CENTER, BOTTOM);
+			text(S, init[0], init[1]-12);
+			pop();
+		}else{
+			push();
+			textAlign(CENTER, TOP);
+			text(S, init[0], init[1]+12);
+			pop();
+		}
 	}
 }
 
 function recalc(){
-	x = new Array(state.steps).fill(0);
-	y = new Array(state.steps).fill(0);
+	x = new Array(condition_count);
+	y = new Array(condition_count);
 
-	x[0] = state.initial[0];
-	y[0] = state.initial[1];
+	bounds = [[state.initial[0][0], state.initial[0][0]], [state.initial[0][1], state.initial[0][1]]];
 
-	bounds = [[x[0], x[0]], [y[0], y[0]]];
+	for(let j=0; j<condition_count; ++j){
+		_x = new Array(state.steps).fill(0);
+		_y = new Array(state.steps).fill(0);
 
-	for(let i=1; i<state.steps; ++i){
-		const x0 = x[i-1], y0 = y[i-1], t0 = (i-1)*state.dt;
+		_x[0] = state.initial[j][0];
+		_y[0] = state.initial[j][1];
 
-		if(!isFinite(x0) || !isFinite(y0)){
-			x[i] = x0, y[i] = y0;
-			continue;
+
+		for(let i=1; i<state.steps; ++i){
+			const x0 = _x[i-1], y0 = _y[i-1], t0 = (i-1)*state.dt;
+
+			if(!isFinite(x0) || !isFinite(y0)){
+				_x[i] = x0, _y[i] = y0;
+				continue;
+			}
+
+			const x1 = dx(x0, y0, t0);
+			const y1 = dy(x0, y0, t0);
+
+			const x2 = dx(x0 + x1*state.dt/2, y0 + y1*state.dt/2, t0 + state.dt/2);
+			const y2 = dy(x0 + x1*state.dt/2, y0 + y1*state.dt/2, t0 + state.dt/2);
+
+			const x3 = dx(x0 + x2*state.dt/2, y0 + y2*state.dt/2, t0 + state.dt/2);
+			const y3 = dy(x0 + x2*state.dt/2, y0 + y2*state.dt/2, t0 + state.dt/2);
+
+			const x4 = dx(x0 + x3*state.dt, y0 + y3*state.dt, t0 + state.dt);
+			const y4 = dy(x0 + x3*state.dt, y0 + y3*state.dt, t0 + state.dt);
+
+			_x[i] = x0 + (x1 + 2*x2 + 2*x3 + x4) * state.dt/6;
+			_y[i] = y0 + (y1 + 2*y2 + 2*y3 + y4) * state.dt/6;
+
+			if(isFinite(_x[i])) bounds[0][0] = Math.min(bounds[0][0], _x[i]);
+			if(isFinite(_x[i])) bounds[0][1] = Math.max(bounds[0][1], _x[i]);
+
+			if(isFinite(_y[i])) bounds[1][0] = Math.min(bounds[1][0], _y[i]);
+			if(isFinite(_y[i])) bounds[1][1] = Math.max(bounds[1][1], _y[i]);
 		}
 
-		const x1 = dx(x0, y0, t0);
-		const y1 = dy(x0, y0, t0);
-
-		const x2 = dx(x0 + x1*state.dt/2, y0 + y1*state.dt/2, t0 + state.dt/2);
-		const y2 = dy(x0 + x1*state.dt/2, y0 + y1*state.dt/2, t0 + state.dt/2);
-
-		const x3 = dx(x0 + x2*state.dt/2, y0 + y2*state.dt/2, t0 + state.dt/2);
-		const y3 = dy(x0 + x2*state.dt/2, y0 + y2*state.dt/2, t0 + state.dt/2);
-
-		const x4 = dx(x0 + x3*state.dt, y0 + y3*state.dt, t0 + state.dt);
-		const y4 = dy(x0 + x3*state.dt, y0 + y3*state.dt, t0 + state.dt);
-
-		x[i] = x0 + (x1 + 2*x2 + 2*x3 + x4) * state.dt/6;
-		y[i] = y0 + (y1 + 2*y2 + 2*y3 + y4) * state.dt/6;
-
-		if(isFinite(x[i])) bounds[0][0] = Math.min(bounds[0][0], x[i]);
-		if(isFinite(x[i])) bounds[0][1] = Math.max(bounds[0][1], x[i]);
-
-		if(isFinite(y[i])) bounds[1][0] = Math.min(bounds[1][0], y[i]);
-		if(isFinite(y[i])) bounds[1][1] = Math.max(bounds[1][1], y[i]);
+		x[j] = _x;
+		y[j] = _y;
 	}
 
 	loop();
