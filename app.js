@@ -62,8 +62,16 @@ function update_state(){
 	const container = document.getElementById("condition-container");
 	condition_count = Array.from(container.children).filter(x => x.tagName == "DIV").length;
 
-	for(let i=0; i<condition_count; ++i)
-		_state.initial.push([Number(startx[i].value), Number(starty[i].value)]);
+	let error_text = "";
+
+	for(let i=0; i<condition_count; ++i){
+		try{
+			_state.initial.push([math.evaluate(startx[i].value), math.evaluate(starty[i].value)]);
+
+		}catch(e){
+			error_text += "Error: Initial condition " + (i+1).toString() + ": Invalid expression: " + e.message + "\n";
+		}
+	}
 
 	_state.steps = Number(steps.value);
 	_state.dt = Number(stepsize.value);
@@ -71,11 +79,12 @@ function update_state(){
 	_state.var1 = var1.value.trim();
 	_state.var2 = var2.value.trim();
 
-	let error_text = "";
-
 	for(let i=0; i<condition_count; ++i){
-		if(isNaN(_state.initial[0][0]) || isNaN(_state.initial[0][1]))
-			error_text += "Error: Invalid initial condition\n";
+		if(_state.initial[i] == undefined)
+			error_text += "Error: Initial condition " + (i+1).toString() + ": Invalid initial condition\n";
+
+		else if(isNaN(_state.initial[i][0]) || isNaN(_state.initial[i][1]))
+			error_text += "Error: Initial condition " + (i+1).toString() + ": Invalid initial condition\n";
 	}
 
 	if(isNaN(_state.steps))
@@ -104,7 +113,7 @@ function update_state(){
 		error_text += "Error: Expression 2: " + e.message + '\n';
 	}
 
-	for(let i=0; i<condition_count; ++i){
+	if(error_text == "") for(let i=0; i<condition_count; ++i){
 		const ctx = new Map();
 		ctx.set(_state.var1, _state.initial[i][0]);
 		ctx.set(_state.var2, _state.initial[i][1]);
@@ -534,7 +543,7 @@ function draw(){
 	];
 
 	noStroke();
-	for(let i=0; i<condition_count; ++i){
+	for(let i=0; i<state.initial.length; ++i){
 		fill(...pal1[i%pal1.length], 100);
 		circle(..._map(...state.initial[i], 0), 10);
 	}
@@ -548,7 +557,7 @@ function draw(){
 		[100, 100, 100],
 	];
 
-	for(let j=0; j<condition_count; ++j){
+	for(let j=0; j<state.initial.length; ++j){
 		stroke(...pal2[j%pal2.length], 100);
 		beginShape();
 		for(let i=0; i<state.steps; ++i) vertex(..._map(x[j][i], y[j][i], i/state.steps));
@@ -556,7 +565,7 @@ function draw(){
 	}
 
 	fill(100, Math.min(255, Math.max(0, 5000 * (1-Math.abs(Math.sqrt(camera[2][0]*camera[2][0] + camera[2][1]*camera[2][1])))))); noStroke();
-	for(let i=0; i<condition_count; ++i){
+	for(let i=0; i<state.initial.length; ++i){
 		let init = _map(...state.initial[i], 0);
 		const S = "(" + state.initial[i][0].toPrecision(2) + ", " + state.initial[i][1].toPrecision(2) + ")";
 		textSize(11);
@@ -575,12 +584,12 @@ function draw(){
 }
 
 function recalc(){
-	x = new Array(condition_count);
-	y = new Array(condition_count);
+	x = new Array(state.initial.length);
+	y = new Array(state.initial.length);
 
 	bounds = [[state.initial[0][0], state.initial[0][0]], [state.initial[0][1], state.initial[0][1]]];
 
-	for(let j=0; j<condition_count; ++j){
+	for(let j=0; j<state.initial.length; ++j){
 		_x = new Array(state.steps).fill(0);
 		_y = new Array(state.steps).fill(0);
 
