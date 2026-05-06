@@ -304,7 +304,7 @@ function draw(){
 	strokeWeight(1);
 	const xscale = Math.pow(2, Math.ceil(Math.log2(bounds[0][1] - bounds[0][0]))) / 4;
 	const yscale = Math.pow(2, Math.ceil(Math.log2(bounds[1][1] - bounds[1][0]))) / 4;
-	const zscale = Math.pow(2, Math.ceil(Math.log2(state.steps))) / 4;
+	const zscale = Math.pow(2, Math.ceil(Math.log2(state.steps*state.dt))) / 4 / state.dt;
 	for(let x=xscale*(Math.floor(state.initial[0]/xscale)-5), i=0; i<60; ++i, x+=xscale/4){
 		if(x == 0) continue;
 		if(x > (bounds[0][0]-(bounds[0][0]+bounds[0][1])/2) * (height/2 - 50) / (height/2 - 100)  + (bounds[0][0]+bounds[0][1])/2
@@ -433,7 +433,7 @@ function draw(){
 				5000 * (1-Math.abs(camera[2][2]))))));
 			noStroke();
 			textAlign(CENTER, TOP);
-			text(z, ..._map(origin[0], origin[1] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), z/state.steps));
+			text((z*state.dt).toPrecision(3), ..._map(origin[0], origin[1] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), z/state.steps));
 			pop();
 			line(..._map(origin[0], origin[1] + 12/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), z/state.steps),
 				..._map(origin[0], origin[1] - 12/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), z/state.steps));
@@ -455,7 +455,7 @@ function draw(){
 			noStroke();
 			if(camera[2][2] < 0) textAlign(LEFT, CENTER);
 			else textAlign(RIGHT, CENTER);
-			text(z, ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
+			text((z*state.dt).toPrecision(3), ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
 			pop();
 			push();
 			fill(100, Math.max(0, Math.min(255, Math.min(
@@ -467,7 +467,7 @@ function draw(){
 			noStroke();
 			if((camera[2][0] < 0) ^ (camera[2][1] < 0)) textAlign(CENTER, TOP);
 			else textAlign(CENTER, BOTTOM);
-			text(z, ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
+			text((z*state.dt).toPrecision(3), ..._map(origin[0] - 18/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
 			pop();
 			line(..._map(origin[0] + 12/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps),
 				..._map(origin[0] - 12/height*Math.max(bounds[0][1]-bounds[0][0], bounds[1][1]-bounds[1][0]), origin[1], z/state.steps));
