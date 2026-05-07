@@ -189,6 +189,8 @@ remove_condition.addEventListener("click", _ => {
 	--condition_count;
 	const el = document.getElementById("condition-container-" + condition_count);
 	if(el) el.parentElement.removeChild(el);
+	startx.pop();
+	starty.pop();
 
 	update_state();
 });
