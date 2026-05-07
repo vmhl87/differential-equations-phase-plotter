@@ -18,6 +18,8 @@ const v_xy = document.getElementById("xy");
 const v_zx = document.getElementById("zx");
 const v_zy = document.getElementById("zy");
 
+const exp_csv = document.getElementById("export");
+
 const error_box = document.getElementById("error");
 
 let state = {
@@ -47,6 +49,35 @@ function dy(X, Y, T){
 }
 
 let x = [], y = [], bounds = [[0, 0], [0, 0]];
+
+exp_csv.addEventListener("click", _ => {
+	let content = "data:text/csv;charset=utf-8,";
+
+	content += "Solution Track,";
+	for(let i=0; i<state.initial.length; ++i)
+		content += (i+1).toString() + ",,";
+	content += '\n';
+
+	content += "Variable,";
+	for(let i=0; i<state.initial.length; ++i)
+		content += state.var1 + "," + state.var2 + ",";
+	content += '\n';
+
+	content += "Initial Condition,";
+	for(let i=0; i<state.initial.length; ++i)
+		content += state.initial[i][0].toString() + "," + state.initial[i][1].toString() + ",";
+	content += '\n';
+
+	for(let j=0; j<state.steps; ++j){
+		content += "Timestep " + (j+1).toString() + ",";
+		for(let i=0; i<state.initial.length; ++i)
+			content += x[i][j].toString() + "," + y[i][j].toString() + ",";
+		content += '\n';
+	}
+
+	let URI = encodeURI(content);
+	window.open(URI);
+});
 
 function update_state(){
 	const _state = {
