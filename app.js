@@ -294,6 +294,8 @@ function cross(a, b){
 let pm = [0, 0], use = false;
 
 function draw(){
+	if(use && !mouseIsPressed && touches.length == 0) use = false;
+
 	if(mouseIsPressed && use){
 		function norm(a){
 			const M = Math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
@@ -312,9 +314,29 @@ function draw(){
 		camera[0] = norm(cross([0, 1, 0], camera[2]));
 		camera[1] = norm(cross(camera[2], camera[0]));
 
+	}else if(touches.length == 1 && use){
+		let x = touches[0].x, y = touches[0].y;
+		function norm(a){
+			const M = Math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
+			return [a[0]/M, a[1]/M, a[2]/M];
+		}
+		function addmul(a, b, c, d) { return [a[0] + b[0]*c/d, a[1] + b[1]*c/d, a[2] + b[2]*c/d]; }
+		function dist(a, b) { return Math.sqrt(Math.pow(a[0]-b[0], 2) + Math.pow(a[1]-b[1], 2)); }
+		let orig = [camera[2][0], camera[2][2]];
+		camera[2] = addmul(camera[2], camera[0], (x-pm[0]) * Math.sqrt(camera[2][0]*camera[2][0] + camera[2][2]*camera[2][2]), 100);
+		camera[2] = addmul(camera[2], camera[1], pm[1]-y, 100);
+		if(dist(orig, [0, 0]) < dist(orig, [camera[2][0], camera[2][2]]) &&
+			((camera[2][1] < 0 && y > pm[1]) || (camera[2][1] > 0 && y < pm[1]))){
+			camera[2] = addmul(camera[2], camera[1], y-pm[1], 100);
+		}
+		camera[2] = norm(camera[2]);
+		camera[0] = norm(cross([0, 1, 0], camera[2]));
+		camera[1] = norm(cross(camera[2], camera[0]));
+
 	}else noLoop();
 
-	pm = [mouseX, mouseY];
+	if(touches.length == 1) pm = [touches[0].x, touches[0].y];
+	else pm = [mouseX, mouseY];
 
 	background(255);
 
@@ -670,6 +692,15 @@ function recalc(){
 function mousePressed(){
 	if(mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
 	pm = [mouseX, mouseY];
+	use = true;
+	loop();
+}
+
+function touchStarted(){
+	if(touches.length != 1) return;
+	let x = touches[0].x, y = touches[0].y;
+	if(x < 0 || x > width || y < 0 || y > height) return;
+	pm = [x, y];
 	use = true;
 	loop();
 }
